@@ -1,0 +1,10 @@
+SELECT sku,
+SUM(CASE WHEN EXTRACT(MONTH from saledate)=6 THEN amt
+END) AS a,
+SUM(CASE WHEN EXTRACT(MONTH from saledate)=7 THEN amt
+END) AS b,
+SUM(CASE WHEN EXTRACT(MONTH from saledate)=8 THEN amt
+END) AS c, (a+b+c) AS summer
+FROM trnsact
+GROUP BY sku
+ORDER BY summer DESC
