@@ -4,7 +4,7 @@
 
 SELECT COUNT(DISTINCT saledate), EXTRACT(MONTH from saledate) AS monnum, EXTRACT(YEAR from saledate) AS yrnum
 FROM trnsact
-GROUP BY monnum, yrnum 
+GROUP BY monnum, yrnum;
 
 -- Exercise 2. Use a CASE statement within an aggregate function to determine which sku
 -- had the greatest total sales during the combined summer months of June, July, and August.
@@ -18,28 +18,34 @@ SUM(CASE WHEN EXTRACT(MONTH from saledate)=8 THEN amt
 END) AS c, (a+b+c) AS summer
 FROM trnsact
 GROUP BY sku
-ORDER BY summer DESC
+ORDER BY summer DESC;
 
 -- Exercise 3. How many distinct dates are there in the saledate column of the transaction
 -- table for each month/year/store combination in the database? Sort your results by the
 -- number of days per combination in ascending order.
-select distinct (extract(month from saledate) || extract(year from saledate) || store) as mys
-	,count(mys) as num
-from trnsact 
-group by mys
-order by num;
+-- select distinct (extract(month from saledate) || extract(year from saledate) || store) as mys
+--	,count(mys) as num
+-- from trnsact 
+-- group by mys
+-- order by num;
+
+SELECT COUNT(DISTINCT saledate) as ndays, EXTRACT(MONTH from saledate) AS monnum, EXTRACT(YEAR from saledate) AS yrnum, store
+FROM trnsact
+GROUP BY monnum, yrnum, store
+ORDER BY ndays ASC;
 
 -- Exercise 4. What is the average daily revenue for each store/month/year combination in
 -- the database? Calculate this by dividing the total revenue for a group by the number of
 -- sales days available in the transaction table for that group. 
-select distinct (extract(month from saledate) || extract(year from saledate) || store) as mys
-       ,(sum(amt)/count(distinct saledate)) as dailyrev
-from trnsact 
-group by mys
-where stype = 'p' 
-	and oreplace(mys, ' ', '') not like '%82005%' -- examine only purchases and excludes all data from  Aug. 2005 
-having count(distinct saledate) > 20 			  -- excludes all stores with less than 20 days of data
-order by dailyrev;
+
+SELECT (SUM(amt)/COUNT(DISTINCT saledate)) as davg, EXTRACT(MONTH from saledate) AS monnum, EXTRACT(YEAR from saledate) AS yrnum, store
+FROM trnsact
+WHERE stype='p'
+   AND monnum <>8 AND yrnum <>2005
+GROUP BY monnum, yrnum, store
+HAVING davg>=20
+ORDER BY davg ASC
+
 
 -- Exercise 5. What is the average daily revenue brought in by Dillard’s stores in areas of
 -- high, medium, or low levels of high school education?
