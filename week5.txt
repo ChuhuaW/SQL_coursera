@@ -1,3 +1,10 @@
+Q1.
+SELECT COUNT(DISTINCT saledate), EXTRACT(MONTH from saledate) AS monnum, EXTRACT(YEAR from saledate) AS yrnum
+FROM trnsact
+GROUP BY monnum, yrnum
+
+
+Q2.
 SELECT sku,
 SUM(CASE WHEN EXTRACT(MONTH from saledate)=6 THEN amt
 END) AS a,
