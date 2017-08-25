@@ -50,25 +50,22 @@ ORDER BY davg ASC
 -- Exercise 5. What is the average daily revenue brought in by Dillard’s stores in areas of
 -- high, medium, or low levels of high school education?
 -- answer: low: 34159.76, medium: 25037.89, hgh: 20937.31
-select case when msa_high >= 50 and msa_high <= 60 then 'low' 
-            when msa_high >  60 and msa_high <= 70 then 'medium'
-	        when msa_high >  70 then 'high'
-	    end as edu_lvl
-	   ,(sum(rev)/sum(nday)) as avgrev       -- avoid double average
-from store_msa 
-left join (
-	select distinct (extract(month from saledate) || extract(year from saledate)) as my
-		,sum(amt)as rev, store
-		,count(distinct saledate) as nday
-	from trnsact 
-	group by my, store
-	where stype = 'p' 
-		and oreplace(my, ' ', '') not like '%82005%' -- examine only purchases and excludes all data from  Aug. 2005 
-	having nday > 20 				     -- excludes all stores with less than 20 days of data
-	)
-	as rev 
-on store_msa.store = rev.store
-group by edu_lvl;
+
+
+SELECT CASE WHEN msa_high >= 50 AND msa_high <= 60 THEN 'low' 
+            WHEN msa_high >  60 AND msa_high <= 70 THEN 'medium'
+	    WHEN msa_high >  70 THEN 'high'
+	    END as edu, (SUM(sale)/SUM(nd)) AS navg
+FROM store_msa m JOIN (
+    SELECT COUNT(DISTINCT saledate) as nd, EXTRACT(MONTH from saledate) AS monnum, EXTRACT(YEAR from saledate) AS 
+           yrnum, store, SUM(amt) AS sale
+    FROM trnsact
+    WHERE stype='p'
+          AND saledate NOT BETWEEN DATE '2005-08-01' AND LAST_DAY(DATE '2005-08-01')
+    GROUP BY monnum, yrnum, store
+    HAVING nd>=20) AS t
+    ON t.store = m.store
+GROUP BY edu
 
 -- Exercise 6. Compare the average daily revenues of the stores with the highest median
 -- msa_income and the lowest median msa_income. In what city and state were these stores,
